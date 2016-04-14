@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>Welcome!</title>
+    <!-- Bootstrap core CSS -->
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="css/navbar-fixed-top.css" rel="stylesheet">
+    <link href="css/maps.css" rel="stylesheet">
+    <link href="css/spage.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <!-- <script src="js/photos.js"></script> -->
+    <link href="css/photos.css" rel="stylesheet">
+</head>
+
+<body>
+    <script>
+        $(window).resize(function () {
+            var h = $(window).height(),
+                offsetTop = 60; // Calculate the top offset
+
+            $('#map').css('height', (h - offsetTop));
+        }).resize();
+        (function() {
+
+            var img = document.getElementById('container').firstChild;
+            img.onload = function() {
+                if(img.height > img.width) {
+                    img.height = '100%';
+                    img.width = 'auto';
+                }
+            };
+        }());
+        function initMap(){
+            var geolocation= {
+                lat: 23.402765,
+                lng: 78.662109
+            };
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: geolocation,
+                zoom: 4,
+                zoomControl: false,
+                mapTypeControl: true,
+                mapTypeControlOptions: {
+                    style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
+                },
+                fullscreenControl: true
+            });
+
+
+            var client_id = 'YLFF5TRSVDMGX0512KRIHJLWQZIN1P2ABKUL0YDBQT5CM1GJ';
+            var client_secret = '0G2DNLD0A2L0FDQA5QPR2IJZNEW3Q5CRUY3FFS4P3XHTDUQS';
+            var base_url = 'https://api.foursquare.com/v2/';
+            var endpoint = 'venues/explore?';
+
+            var params;
+            var key = '&client_id=' + client_id + '&client_secret=' + client_secret + '&v=' + '20140626';
+            var url = base_url + endpoint + "ll=28.6,76.8&radius=50000&query=attractions" + key;
+            var x = [];
+            var markers = [];
+            var contents = [];
+            var k = 0;
+            var new_url=[];
+            var venuek=[];
+            var photo_url=[]
+            var start_dest=new google.maps.LatLng(28.6,76.8);
+            //var directionsService = [];
+            //set up map
+            $.get(url, function(result) {
+                //$('#msg pre').text(JSON.stringify(url));
+                $('#msg pre').text(JSON.stringify(result));
+                //alert(result.response.groups.type);
+                var groups = result.response.groups;
+                alert(groups.length);
+                for (var j in groups) {
+                    var venues = groups[j].items;
+                    alert(venues.length);
+                    //printVenues(venues);
+                    //alert("out");
+                    for (var i in venues) {
+                        var venue = venues[i];
+                        venuek[k]=venue;
+                        // alert(venue.venue.id);
+                        // place the a marker on the map
+
+                        var place_id = venue.venue.id;
+                        var new_key = 'client_id=' + client_id + '&client_secret=' + client_secret + '&v=' + '20160401';
+                        new_url[k] = 'https://api.foursquare.com/v2/venues/'+place_id+'/photos?'+new_key;
+                        new_url[k].index=k;
+                        (function retr_photo(k){
+                        console.log("name = "+venue.venue.name+"\nrating = "+venue.venue.rating);
+                        console.log("new_url = "+new_url[k]);
+                        $.get(new_url[k], function(new_result){
+                              var photos=new_result.response.photos.items;
+                              photo_url[k]=photos[0].prefix+"original"+photos[0].suffix;
+                              console.log(photo_url[k]);
+                              console.log(venuek[k].venue.name);
+                        });
+                    })(k);
+
+                        markers[k] = new google.maps.Marker({
+                            position: new google.maps.LatLng(venue.venue.location.lat, venue.venue.location.lng),
+                            map: map
+                        });
+                        //markers.push(marker);
+                        markers[k].index = k;
+                        contents[k] = venue.venue.name;
+                        x[k] = new google.maps.InfoWindow({
+                            content: contents[k],
+                            maxWidth: 300
+                        });
+                        google.maps.event.addListener(markers[k], 'click', function() {
+                            //x[this.index].setContent(this.html);
+                            x[this.index].open(map, this);
+                        });
+                        //start_dest=markers[k].getPosition();
+                        k = k + 1;
+
+                    }
+                }
+            });
+        }
+
+    </script>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container" align="center">
+                <!-- <i class="glyphicon glyphicon-user"></i> -->
+            <div class="input-group autocomplete">
+                <input  id = "pac-input" size="75" class="form-control" type = "text"/>
+                <span class="input-group-addon">
+                    <i class="fa fa-search"></i></span>
+            </div>
+        </div>
+    </nav>
+    <div class="row">
+        <div class="col-md-3 nopadding">
+            <div class="jumbotron image" id="container" style="box-shadow: 1px 1px 5px #888888;">
+                <img src=$photo_url[0] />
+            </div>
+        </div>
+        <div class="col-md-9 nopadding" style="margin-top:1%:padding:0px">
+            <div id="map" style="height:100%; width:100%;">
+            </div>
+        </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC7Kb6lhE3dA4201a82tu9CNGkvsOuaI3M&libraries=places&callback=initMap"
+    async defer></script>
+</body>
+
+</html>

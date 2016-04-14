@@ -1,0 +1,37 @@
+body {
+    padding-top: 70px;
+}
+
+.navbar-brand {
+    position: absolute;
+    font-size: 3vh;
+    width: 100%;
+    left: 0;
+    top: 0;
+    text-align: center;
+    margin: auto;
+    z-index: -1;
+}
+
+.btn-separator:after {
+    content: ' ';
+    display: block;
+    float: left;
+    background: #5c5c5c;
+    margin-top: 18px;
+    height: 25px;
+    width: 2px;
+}
+
+.badge-notify {
+    background: red;
+    position: relative;
+    top: -10px;
+    left: -25px;
+}
+
+.scrollable-menu {
+    height: auto;
+    max-height: 200px;
+    overflow-x: hidden;
+}
